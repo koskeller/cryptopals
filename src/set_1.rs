@@ -1,5 +1,4 @@
-use super::{encoding, freq_analysis, vigenere, xor};
-use openssl::symm::{self, Cipher};
+use crate::{freq_analysis, vigenere, xor};
 
 fn find_single_byte_xor_in_file(filename: &str) -> String {
     let file = std::fs::read_to_string(filename).unwrap();
@@ -38,13 +37,6 @@ fn break_repeatig_key_xor(cipher: &[u8]) -> String {
     String::from_utf8(result).unwrap()
 }
 
-fn decrypt_aes_ecb(data: &[u8], key: &[u8]) -> String {
-    let cipher = Cipher::aes_128_ecb();
-    let iv: Vec<u8> = vec![];
-    let pt = symm::decrypt(cipher, key, Some(&iv), data).unwrap();
-    String::from_utf8(pt).unwrap()
-}
-
 fn detect_aes_in_ecb_mode(data: String) -> String {
     let mut max_score = 0;
     let mut result: &str = "";
@@ -71,6 +63,7 @@ fn detect_aes_in_ecb_mode(data: String) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::encoding;
 
     #[test]
     fn test_find_single_byte_xor_in_file() {
@@ -84,19 +77,9 @@ mod tests {
         let payload = std::fs::read_to_string("data/6.txt")
             .unwrap()
             .replace('\n', "");
-        let cipher = encoding::decode(payload).unwrap();
+        let cipher = encoding::base64_decode(payload).unwrap();
 
         assert!(break_repeatig_key_xor(&cipher).starts_with("I'm back and I'm ringin"));
-    }
-
-    #[test]
-    fn test_decrypt_aes_ecb() {
-        let key = b"YELLOW SUBMARINE";
-        let data = std::fs::read_to_string("data/7.txt")
-            .unwrap()
-            .replace('\n', "");
-        let data = encoding::decode(data).unwrap();
-        assert!(decrypt_aes_ecb(&data, key).starts_with("I'm back and I'm ringin"))
     }
 
     #[test]

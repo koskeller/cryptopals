@@ -1,5 +1,3 @@
-use super::encoding;
-
 pub fn humming_distance(a: &[u8], b: &[u8]) -> u8 {
     let mut distance = 0;
     for (x, y) in a.iter().zip(b.iter()) {
@@ -44,6 +42,7 @@ pub fn find_key_size(cipher: &[u8]) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::encoding;
 
     #[test]
     fn test_humming_distance() {
@@ -57,7 +56,7 @@ mod tests {
         let file = std::fs::read_to_string("data/6.txt")
             .unwrap()
             .replace('\n', "");
-        let cipher = encoding::decode(file).unwrap();
+        let cipher = encoding::base64_decode(file).unwrap();
 
         assert_eq!(find_key_size(&cipher), 29);
     }
